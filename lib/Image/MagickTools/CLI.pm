@@ -8,6 +8,15 @@ use IO::Handle;
 use Locale::TextDomain qw(magick-tools);
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
 
+my %global_optspec = (
+	'f|file' => 'files',
+	'q|quiet' => 'quiet',
+	'h|help' => 'help',
+	'v|verbose' => 'verbose',
+	'V|version' => 'version',
+);
+my %global_optspec_defaults = (files => []);
+
 sub new {
 	my ($class, $argv) = @_;
 
@@ -36,7 +45,6 @@ sub new {
 		__cmd_args => [@$argv],
 	}, $class;
 }
-
 
 sub perl_class {
 	my ($name) = @_;
@@ -90,6 +98,17 @@ sub dispatch {
 	autoflush STDERR, 1;
 
 	my %options;
+	foreach my $key (keys %global_optspec_defaults) {
+		my $default = $global_optspec_defaults{$key};
+		$default = [@$default] if 'ARRAY' eq ref $default;
+		$options{$key} = $default;
+	}
+
+	my %optspec = %global_optspec;
+	foreach my $key (keys %global_optspec) {
+		$optspec{$key} = \$options{$global_optspec{$key}};
+	}
+
 	Getopt::Long::Configure('bundling');
 	{
 		local $SIG{__WARN__} = sub {
@@ -98,7 +117,7 @@ sub dispatch {
 		};
 
 		GetOptionsFromArray($self->{__global_options},
-			'log-stderr' => \$options{log_stderr},
+			'f|file' => \$options{files},
 			'q|quiet' => \$options{quiet},
 			'h|help' => \$options{help},
 			'v|verbose' => \$options{verbose},

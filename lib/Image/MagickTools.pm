@@ -8,6 +8,7 @@ $Image::MagickTools::VERSION = 0.1;
 
 use Locale::TextDomain qw(image-magicktools);
 
+use Image::Magick;
 use File::Spec;
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
 
