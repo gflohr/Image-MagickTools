@@ -13,10 +13,19 @@ use File::Spec;
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
 
 sub new {
-	my ($class) = @_;
+	my ($class, $args, $global_options) = @_;
 
-	my $self = '';
-	bless \$self, $class;
+	$args ||= [];
+
+	my %options = $class->parseOptions($args);
+
+	my $self = {
+		__args => $args,
+		__global_options => $global_options,
+		__options => \%options,
+	};
+
+	bless $self, $class;
 }
 
 sub name {
@@ -36,12 +45,16 @@ sub description {
 }
 
 sub run {
-	my ($self, $args, $global_options) = @_;
+	my ($self, $image) = @_;
 
-	$args ||= [];
-	my %options = $self->parseOptions($args);
+	$self->_run(
+		$self->{__args},
+		$self->{__global_options},
+		%{$self->{__options}},
+		_image => $image,
+	);
 
-	return $self->_run($args, $global_options, %options);
+	return $image;
 }
 
 sub parseOptions {
@@ -87,9 +100,9 @@ sub __usageError {
 }
 
 sub _displayHelp {
-	my ($self) = @_;
+	my ($class) = @_;
 
-	my $module = Image::MagickTools::class2module(ref $self);
+	my $module = Image::MagickTools::CLI::class2module($class);
 
 	my $path = $INC{$module};
 	$path = './' . $path if !File::Spec->file_name_is_absolute($path);
@@ -110,8 +123,8 @@ sub _displayHelp {
 Image::MagickTools - Some ImageMagick tools that I often use.
 
 	magick-tools [--quiet | -q] [--verbose | -v]
-	[-h|--help] [-V | --version]
-	IMAGE_FILES... COMMANDS [OPTIONS]
+	[--help | -h] [--version | -V]
+	[--in | -i] [--out | -i] COMMANDS [OPTIONS]
 
 	magick-tools --help
 

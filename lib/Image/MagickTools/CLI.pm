@@ -9,13 +9,14 @@ use Locale::TextDomain qw(magick-tools);
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
 
 my %global_optspec = (
-	'f|file' => 'files',
+	'i|in=s' => 'in',
+	'o|out=s' => 'out',
 	'q|quiet' => 'quiet',
 	'h|help' => 'help',
 	'v|verbose' => 'verbose',
 	'V|version' => 'version',
 );
-my %global_optspec_defaults = (files => []);
+my %global_optspec_defaults;
 
 sub new {
 	my ($class, $argv) = @_;
@@ -118,7 +119,8 @@ sub dispatch {
 
 	my %optspec = %global_optspec;
 	foreach my $key (keys %global_optspec) {
-		$optspec{$key} = \$options{$global_optspec{$key}};
+		$optspec{$key} = ref $options{$global_optspec{$key}} ?
+			$options{$global_optspec{$key}} : \$options{$global_optspec{$key}};
 	}
 
 	Getopt::Long::Configure('bundling');
@@ -135,6 +137,7 @@ sub dispatch {
 	$self->displayVersion if $options{version};
 
 	my @cmds = @{$self->{__cmds}};
+	my @instances;
 	foreach my $task (@cmds) {
 		my ($cmd, @args) = @$task;
 		$cmd =~ s/-/::/g;
@@ -155,8 +158,26 @@ sub dispatch {
 					error => $msg);
 		}
 
-		$class->new->run(\@args, \%options);
+		# That may call help and exit.
+		$class->new(\@args, \%options);
 	}
+
+	if (!defined $options{in}) {
+		$self->usageError(__x"the option '--in' (resp. '-i') is mandatory.");
+	}
+	if (!defined $options{out}) {
+		$self->usageError(__x"the option '--out' (resp. '-o') is mandatory.");
+	}
+
+	my $image = Image::Magick->new;
+	my $error = $image->Read($options{in});
+	die "$error\n" if length $error;
+
+	foreach my $instance (@instances) {
+		$image = $instance->run([$image]);
+	}
+
+	return $self;
 }
 
 sub displayUsage {

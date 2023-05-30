@@ -10,18 +10,15 @@ use Locale::TextDomain qw(image-magicktools);
 
 sub _getDefaults {}
 
-sub _getOptionSpecs {}
+sub _getOptionSpecs {
+}
 
 sub _run {
 	my ($self, $args, $global_options, %options) = @_;
 
-	$global_options->{quiet} = 1;
-	delete $global_options->{verbose};
-	$global_options->{log_stderr} = 1;
+	my $image = $options{_image};
 
-	# TODO
-
-	return $self;
+	return $image;
 }
 
 sub description {
@@ -51,6 +48,25 @@ Enhance images by applying one or more filters.
 =head1 OPTIONS
 
 =over 4
+
+=item -r, -radius
+
+The radius of the Gaussian, in pixels,  not counting the center pixel
+(default 0).
+
+=item -s, --sigma
+
+The standard deviation of the Gaussian, in pixels (default 1.0).
+
+=item -a, --amount
+
+The percentage of the difference between the original and the blur
+image that is added back into the original (default 1.0).
+
+=item -t, --threshold
+
+The threshold, as a fraction of QuantumRange, needed to apply the
+difference amount (default 0.05).
 
 =item -h, --help
 
