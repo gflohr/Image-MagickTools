@@ -1,7 +1,0 @@
-#! /usr/bin/env perl
-
-use strict;
-
-use Magick::Tools::CLI;
-
-Magick::Tools::CLI->new->dispatch;

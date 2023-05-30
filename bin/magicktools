@@ -1,0 +1,7 @@
+#! /usr/bin/env perl
+
+use strict;
+
+use Image::MagickTools::CLI;
+
+Image::MagickTools::CLI->new->dispatch;

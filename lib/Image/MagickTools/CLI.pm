@@ -1,26 +1,12 @@
 #! /bin/false
 
-package Magick::Tools::CLI;
+package Image::MagickTools::CLI;
 
 use strict;
 
 use IO::Handle;
 use Locale::TextDomain qw(magick-tools);
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
-
-my $perl_class = sub {
-	my ($name) = @_;
-
-	return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*(?:::[_a-zA-Z][_0-9a-zA-Z]*)*$/o;
-};
-
-my $class2module = sub {
-	my ($class) = @_;
-
-	$class =~ s{(?:::|')}{/}g;
-
-	return $class . '.pm';
-};
 
 sub new {
 	my ($class, $argv) = @_;
@@ -49,6 +35,52 @@ sub new {
 		__cmd => $cmd,
 		__cmd_args => [@$argv],
 	}, $class;
+}
+
+
+sub perl_class {
+	my ($name) = @_;
+
+	return $name =~ /^[_a-zA-Z][_0-9a-zA-Z]*(?:::[_a-zA-Z][_0-9a-zA-Z]*)*$/o;
+};
+
+sub class2module {
+	my ($class) = @_;
+
+	$class =~ s{(?:::|')}{/}g;
+
+	return $class . '.pm';
+}
+
+sub commands {
+	my %commands;
+
+	foreach my $dir (@INC) {
+		opendir my $dirh,
+			File::Spec->catfile($dir, 'Image', 'MagickTools', 'Command')
+			or next;
+		my @classes =
+			map { s/\.pm$//i; "Image::MagickTools::Command::$_" }
+			grep { /[_a-z][_a-z0-9]+\.pm/i }
+			readdir $dirh;
+		foreach my $class (@classes) {
+			my $module = class2module $class;
+			eval {
+				require $module;
+				my $description = $class->description;
+				chomp $description;
+				$commands{$class->name} = $description;
+			};
+			if ($@) {
+				if ($ENV{IMAGE_MAGICKTOOLS_DEBUG}) {
+					warn "require $class: $@\n";
+				}
+				next;
+			}
+		}
+	}
+
+	return %commands;
 }
 
 sub dispatch {
@@ -88,7 +120,7 @@ sub dispatch {
 		ucfirst $_;
 	} split /::/, $cmd;
 
-	my $class = 'Magick::Tools::Command::' . $cmd;
+	my $class = 'Image::MagickTools::Command::' . $cmd;
 	my $module = class2module $class;
 
 	eval { require $module };
@@ -128,9 +160,17 @@ EOF
 
 	$msg .= "\n";
 
-	$msg .= __<<EOF;
-  enhance                     enhance image
-EOF
+	my %commands = commands;
+	foreach my $command (sort keys %commands) {
+		my @description = split /\n/, $commands{$command};
+		$msg .= '  ' . $command;
+		my $offset = 30 - 2 - length $command;
+		foreach my $line (@description) {
+			$msg .= ' ' x $offset;
+			$msg .= "$line\n";
+			$offset = 30;
+		}
+	}
 
 	$msg .= "\n";
 
@@ -201,13 +241,13 @@ sub usageError {
 }
 
 sub displayVersion {
-    my $msg = __x('{program} (Magick::Tools) {version}
+    my $msg = __x('{program} (Image::MagickTools) {version}
 Copyright (C) {years} Guido Flohr <guido.flohr@cantanea.com>.
 License WTFPL_2: <http://www.wtfpl.net/>
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 Written by Guido Flohr (http://www.guido-flohr.net/).
-', program => $0, years => '2023', version => $Magick::Tools::VERSION);
+', program => $0, years => '2023', version => $Image::MagickTools::VERSION);
 
 	print $msg;
 
@@ -218,4 +258,4 @@ Written by Guido Flohr (http://www.guido-flohr.net/).
 
 =head1 NAME
 
-Magick::Tools::CLI - Magick::Tools command-line dispatcher.
+Image::MagickTools::CLI - Image::MagickTools command-line dispatcher.
