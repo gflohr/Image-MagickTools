@@ -14,7 +14,8 @@ $Magick::Tools::VERSION = 0.1;
 Magick::Tools - Some ImageMagick tools that I often use.
 
 	magick-tools [--quiet | -q] [--verbose | -v]
-	[-h|--help] [-V | --version] COMMAND [OPTIONS]
+	[-h|--help] [-V | --version]
+	IMAGE_FILES... COMMANDS [OPTIONS]
 
 	magick-tools --help
 
