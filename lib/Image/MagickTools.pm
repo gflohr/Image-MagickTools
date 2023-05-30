@@ -83,7 +83,7 @@ sub __usageError {
 	$class =~ s/^Image::MagickTools::Command:://;
 	my $cmd = join '-', map { lcfirst $_ } split /::/, $class;
 
-	return Qgoda::CLI->commandUsageError($cmd, @msg);
+	return Image::MagickTools::CLI->commandUsageError($cmd, @msg);
 }
 
 sub _displayHelp {

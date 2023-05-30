@@ -61,7 +61,3 @@ Show this help page and exit.
 =head1 SEE ALSO
 
 magick-tools(1), perl(1)
-
-=head1 QGODA
-
-Part of Image::MagickTools.

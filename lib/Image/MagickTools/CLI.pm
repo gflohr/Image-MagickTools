@@ -22,27 +22,41 @@ sub new {
 
 	$argv ||= [@ARGV];
 
-	my (@args, $cmd);
+	my %commands = $class->commands;
 
 	# Split arguments into global options like '--verbose', a command,
-	# and command-specific options.  We simplify this by stipulating that
-	# global options cannot take any arguments.  So the first command-line
-	# argument that does not start with a hyphen is the command, the rest
-	# are options and arguments for that command.
+	# and command-specific options.
+	my @args;
 	while (@$argv) {
-		my $arg = shift @$argv;
-		if ($arg =~ /^-[-a-zA-Z0-9]/) {
-			push @args, $arg;
+		if ($argv->[0] =~ /^-[-a-zA-Z0-9]/) {
+			push @args, shift @$argv;
 		} else {
-			$cmd = $arg;
 			last;
+		}
+	}
+
+	# Now collect the commands.
+	my @cmds;
+	if (@$argv) {
+		my $cmd = shift @$argv;
+		if (!exists $commands{$cmd}) {
+			$class->usageError(__x("unknown command '{command}'.",
+			                       command => $cmd));
+		}
+		push @cmds, [$cmd];
+		while (@$argv) {
+			my $arg = shift @$argv;
+			if (exists $commands{$arg}) {
+				push @cmds, [$arg];
+			} else {
+				push @{$cmds[-1]}, $arg;
+			}
 		}
 	}
 
 	bless {
 		__global_options => \@args,
-		__cmd => $cmd,
-		__cmd_args => [@$argv],
+		__cmds => \@cmds,
 	}, $class;
 }
 
@@ -80,9 +94,7 @@ sub commands {
 				$commands{$class->name} = $description;
 			};
 			if ($@) {
-				if ($ENV{IMAGE_MAGICKTOOLS_DEBUG}) {
-					warn "require $class: $@\n";
-				}
+				warn "require $class: $@\n";
 				next;
 			}
 		}
@@ -116,38 +128,25 @@ sub dispatch {
 			$self->usageError(shift);
 		};
 
-		GetOptionsFromArray($self->{__global_options},
-			'f|file' => \$options{files},
-			'q|quiet' => \$options{quiet},
-			'h|help' => \$options{help},
-			'v|verbose' => \$options{verbose},
-			'V|version' => \$options{version},
-		);
+		GetOptionsFromArray($self->{__global_options}, %optspec);
 	}
 
 	$self->displayUsage if $options{help};
 	$self->displayVersion if $options{version};
 
-	my $cmd = $self->{__cmd}
-		or $self->usageError(__"no command given!");
-	$cmd =~ s/-/::/g;
-	$self->usageError(__x("invalid command name '{command}'",
-							command => $self->{__cmd}))
-		if !perl_class $cmd;
+	my @cmds = @{$self->{__cmds}};
+	foreach my $task (@cmds) {
+		my ($cmd, @args) = @$task;
+		$cmd =~ s/-/::/g;
+		$cmd = join '::', map {
+			ucfirst $_;
+		} split /::/, $cmd;
 
-	$cmd = join '::', map {
-		ucfirst $_;
-	} split /::/, $cmd;
+		my $class = 'Image::MagickTools::Command::' . $cmd;
+		my $module = class2module $class;
 
-	my $class = 'Image::MagickTools::Command::' . $cmd;
-	my $module = class2module $class;
-
-	eval { require $module };
-	if ($@) {
-		if ($@ =~ m{^Can't locate $module in \@INC}) {
-			$self->usageError(__x("unknown command '{command}'",
-									command => $self->{__cmd}));
-		} else {
+		eval { require $module };
+		if ($@) {
 			my $msg = $@;
 			chomp $msg;
 			die __x("{program}: {command}: {error}\n",
@@ -155,9 +154,9 @@ sub dispatch {
 					command => $self->{__cmd},
 					error => $msg);
 		}
-	}
 
-	return $class->new->run($self->{__cmd_args}, \%options);
+		$class->new->run(\@args, \%options);
+	}
 }
 
 sub displayUsage {
