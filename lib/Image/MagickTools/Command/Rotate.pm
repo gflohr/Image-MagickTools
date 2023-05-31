@@ -1,6 +1,6 @@
 #! /bin/false
 
-package Image::MagickTools::Command::Enhance;
+package Image::MagickTools::Command::Rotate;
 
 use strict;
 
@@ -12,10 +12,8 @@ sub _getDefaults {}
 
 sub _getOptionSpecs {
 	return (
-		radius => 'r|radius=s',
-		sigma => 's|sigma=s',
-		amount => 'a|amount=s',
-		threshold => 't|threshold=s',
+		degrees => 'd|a|angle|degrees=s',
+		background => 'b|background=s',
 	);
 }
 
@@ -28,7 +26,7 @@ sub _run {
 	my %params = $self->_cleanOptions(\%options, @params);
 
 	foreach my $wrapper (@$wrappers) {
-		my $error = $wrapper->image->UnsharpMask(%params);
+		my $error = $wrapper->image->Rotate(%params);
 		die "$error\n" if length $error;
 	}
 
@@ -37,7 +35,7 @@ sub _run {
 
 sub description {
 	return __(<<'EOF');
-enhance image or images
+rotate an image
 EOF
 }
 
@@ -51,36 +49,25 @@ magick-tools enhance - Enhance image or images
 
 	magick-tools [--quiet | -q] [--verbose | -v]
 	[-h|--help] [-V | --version]
-	IMAGE_FILES... enhance [OPTIONS]
+	IMAGE_FILES... rotate [OPTIONS]
 
 Try 'magick-tools --help' for a description of global options.
 
 =head1 DESCRIPTION
 
-Enhance images by applying one or more filters.
+Rotate an image.
 
 =head1 OPTIONS
 
 =over 4
 
-=item -r, -radius
+=item -d, -degrees, -a, --angle DOUBLE
 
-The radius of the Gaussian, in pixels, not counting the center pixel
-(default 0).
+Rotation angle in clockwise direction. Range: 0 - 360 degrees.
 
-=item -s, --sigma
+=item -b, --background
 
-The standard deviation of the Gaussian, in pixels (default 1.0).
-
-=item -a, --amount
-
-The percentage of the difference between the original and the blur
-image that is added back into the original (default 1.0).
-
-=item -t, --threshold
-
-The threshold, as a fraction of QuantumRange, needed to apply the
-difference amount (default 0.05).
+The background color as a L<color name|https://imagemagick.org/script/color.php>.
 
 =item -h, --help
 
