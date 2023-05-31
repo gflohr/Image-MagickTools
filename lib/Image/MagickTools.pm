@@ -45,16 +45,16 @@ sub description {
 }
 
 sub run {
-	my ($self, $image) = @_;
+	my ($self, $images) = @_;
 
-	$self->_run(
+	$images = $self->_run(
 		$self->{__args},
 		$self->{__global_options},
 		%{$self->{__options}},
-		_image => $image,
+		_images => $images,
 	);
 
-	return $image;
+	return $images;
 }
 
 sub parseOptions {

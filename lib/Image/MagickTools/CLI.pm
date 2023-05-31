@@ -8,6 +8,8 @@ use IO::Handle;
 use Locale::TextDomain qw(magick-tools);
 use Getopt::Long 2.36 qw(GetOptionsFromArray);
 
+use Image::MagickTools::ImageWrapper;
+
 my %global_optspec = (
 	'i|in=s' => 'in',
 	'o|out=s' => 'out',
@@ -173,8 +175,10 @@ sub dispatch {
 	my $error = $image->Read($options{in});
 	die "$error\n" if length $error;
 
+	my $images = [Image::MagickTools::ImageWrapper->new($image, $options{out})];
+
 	foreach my $instance (@instances) {
-		$image = $instance->run([$image]);
+		$images = $instance->run([$images]);
 	}
 
 	return $self;

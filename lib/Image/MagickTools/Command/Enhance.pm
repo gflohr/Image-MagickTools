@@ -11,14 +11,24 @@ use Locale::TextDomain qw(image-magicktools);
 sub _getDefaults {}
 
 sub _getOptionSpecs {
+	return (
+		radius => 'r|radius=s',
+		sigma => 's|sigma=s',
+		amount => 'a|amount=s',
+		threshold => 't|threshold=s',
+	);
 }
 
 sub _run {
 	my ($self, $args, $global_options, %options) = @_;
 
-	my $image = $options{_image};
+	my $images = $options{_images};
 
-	return $image;
+	foreach my $image (@$images) {
+
+	}
+
+	return $images;
 }
 
 sub description {
