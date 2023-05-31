@@ -114,6 +114,17 @@ sub _displayHelp {
 	exit(Pod::Perldoc->run());
 }
 
+sub _cleanOptions {
+	my ($self, $options, @params) = @_;
+
+	my %params;
+	foreach my $param (@params) {
+		$params{$param} = $options->{$param} if defined $options->{$param};
+	}
+
+	return %params;
+}
+
 1;
 
 =pod

@@ -22,13 +22,17 @@ sub _getOptionSpecs {
 sub _run {
 	my ($self, $args, $global_options, %options) = @_;
 
-	my $images = $options{_images};
+	my $wrappers = $options{_images};
+	my %optspec = $self->_getOptionSpecs;
+	my @params = keys %optspec;
+	my %params = $self->_cleanOptions(\%options, @params);
 
-	foreach my $image (@$images) {
-
+	foreach my $wrapper (@$wrappers) {
+		my $error = $wrapper->image->UnsharpMask(%params);
+		die "$error\n" if length $error;
 	}
 
-	return $images;
+	return $wrappers;
 }
 
 sub description {
@@ -61,7 +65,7 @@ Enhance images by applying one or more filters.
 
 =item -r, -radius
 
-The radius of the Gaussian, in pixels,  not counting the center pixel
+The radius of the Gaussian, in pixels, not counting the center pixel
 (default 0).
 
 =item -s, --sigma

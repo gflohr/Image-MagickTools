@@ -161,7 +161,7 @@ sub dispatch {
 		}
 
 		# That may call help and exit.
-		$class->new(\@args, \%options);
+		push @instances, $class->new(\@args, \%options);
 	}
 
 	if (!defined $options{in}) {
@@ -175,10 +175,15 @@ sub dispatch {
 	my $error = $image->Read($options{in});
 	die "$error\n" if length $error;
 
-	my $images = [Image::MagickTools::ImageWrapper->new($image, $options{out})];
+	my $wrappers = [Image::MagickTools::ImageWrapper->new($image, $options{out})];
 
 	foreach my $instance (@instances) {
-		$images = $instance->run([$images]);
+		$wrappers = $instance->run($wrappers);
+	}
+
+	foreach my $wrapper (@$wrappers) {
+		$error = $wrapper->image->Write($wrapper->filename);
+		die "$error\n" if length $error;
 	}
 
 	return $self;
