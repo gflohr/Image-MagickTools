@@ -7,9 +7,15 @@ META.yml
 Makefile.PL
 README.md
 README.pod
-bin/magick-tools
+bin/magicktools
 dist.ini
-lib/Magick/Tools.pm
+lib/Image/MagickTools.pm
+lib/Image/MagickTools/CLI.pm
+lib/Image/MagickTools/Command/Landscape.pm
+lib/Image/MagickTools/Command/Rotate.pm
+lib/Image/MagickTools/Command/Srcset.pm
+lib/Image/MagickTools/Command/Unsharp.pm
+lib/Image/MagickTools/ImageWrapper.pm
 perlcritic.rc
 t/author-critic.t
 t/author-pod-syntax.t

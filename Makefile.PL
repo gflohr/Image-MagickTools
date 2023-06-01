@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 
-use 5.010000;
+
 
 use ExtUtils::MakeMaker;
 
@@ -12,15 +12,20 @@ my %WriteMakefileArgs = (
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => 0
   },
-  "DISTNAME" => "Magick-Tools",
+  "DISTNAME" => "Image-MagickTools",
   "EXE_FILES" => [
-    "bin/magick-tools"
+    "bin/magicktools"
   ],
   "LICENSE" => "unrestricted",
-  "MIN_PERL_VERSION" => "5.010000",
-  "NAME" => "Magick::Tools",
+  "NAME" => "Image::MagickTools",
   "PREREQ_PM" => {
-    "Magick::Tools::CLI" => 0,
+    "File::Spec" => 0,
+    "Getopt::Long" => "2.36",
+    "IO::Handle" => 0,
+    "Image::Magick" => 0,
+    "Locale::TextDomain" => 0,
+    "Pod::Perldoc" => 0,
+    "base" => 0,
     "strict" => 0
   },
   "VERSION" => "0.1",
@@ -31,7 +36,13 @@ my %WriteMakefileArgs = (
 
 
 my %FallbackPrereqs = (
-  "Magick::Tools::CLI" => 0,
+  "File::Spec" => 0,
+  "Getopt::Long" => "2.36",
+  "IO::Handle" => 0,
+  "Image::Magick" => 0,
+  "Locale::TextDomain" => 0,
+  "Pod::Perldoc" => 0,
+  "base" => 0,
   "strict" => 0
 );
 

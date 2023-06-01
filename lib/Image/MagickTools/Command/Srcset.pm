@@ -56,7 +56,7 @@ sub _run {
 				$image->Clone,
 				"$basename-${new_width}w$extender",
 			);
-			$error = $image->Scale(
+			$error = $new_wrapper->image->Scale(
 				width => $new_width,
 				height => $height * $new_width / $width,
 			);
