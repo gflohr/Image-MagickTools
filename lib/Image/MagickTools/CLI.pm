@@ -223,10 +223,19 @@ EOF
 	$msg .= "\n";
 
 	$msg .= __<<EOF;
+The following global options must be given before the command name!
+
+Filenames:
+  -i, --in=FILENAME           name of the input image (mandatory)
+  -o, --out                   name of the output image (mandatory)
+EOF
+
+	$msg .= "\n";
+
+	$msg .= __<<EOF;
 Operation mode:
   -q, --quiet                 quiet mode
   -v, --verbose               verbosely log what is going on
-      --log-stderr            log to standard error instead of standard out
 EOF
 
 	$msg .= "\n";

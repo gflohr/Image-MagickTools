@@ -14,11 +14,23 @@ sub new {
 }
 
 sub image {
-	shift->{__image};
+	my ($self, $image) = @_;
+
+	if (defined $image) {
+		$self->{__image} = $image;
+	}
+
+	return $self->{__image};
 }
 
 sub filename {
-	shift->{__filename};
+	my ($self, $filename) = @_;
+
+	if (defined $filename) {
+		$self->{__filename} = $filename;
+	}
+
+	return $self->{__filename};
 }
 
 1;

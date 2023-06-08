@@ -125,6 +125,56 @@ sub _cleanOptions {
 	return %params;
 }
 
+sub __log {
+	my ($self, $prefix, $msg) = @_;
+
+	chomp $msg;
+
+	if ('fatal' eq $prefix) {
+		die "[fatal] $msg\n";
+	} else {
+		print STDERR "[$prefix] $msg\n";
+	}
+
+	return $self;
+}
+
+sub info {
+	my ($self, $msg) = @_;
+
+	return if $self->{__global_options}->{quiet};
+
+	$self->__log('info', $msg);
+}
+
+sub warning {
+	my ($self, $msg) = @_;
+
+	return if $self->{__global_options}->{quiet};
+
+	$self->__log('warning', $msg);
+}
+
+sub debug {
+	my ($self, $msg) = @_;
+
+	return if !$self->{__global_options}->{verbose};
+
+	$self->__log('debug', $msg);
+}
+
+sub error {
+	my ($self, $msg) = @_;
+
+	$self->__log('error', $msg);
+}
+
+sub fatal {
+	my ($self, $msg) = @_;
+
+	$self->__log('fatal', $msg);
+}
+
 1;
 
 =pod
